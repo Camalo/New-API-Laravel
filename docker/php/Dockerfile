@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
         pdo_pgsql \
+        pgsql \
         mbstring \
         xml \
         intl \
