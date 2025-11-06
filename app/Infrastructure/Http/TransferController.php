@@ -14,22 +14,24 @@ class TransferController
 {
     public function __invoke(Request $request, TransferUseCase $useCase)
     {
+        $request->headers->set('Accept', 'application/json');
+
         $validated = $request->validate([
             'from_user_id' => 'required|integer',
             'to_user_id'   => 'required|integer|different:from_user_id',
             'amount'       => 'required|numeric|min:0.01',
             'comment'      => 'nullable|string',
         ]);
-
+       
         try {
             $response = $useCase(new TransferRequest(
-                fromUserId: $validated['from_user_id'],
-                toUserId: $validated['to_user_id'],
-                amount: $validated['amount'],
+                fromUserId: (int)$validated['from_user_id'],
+                toUserId: (int)$validated['to_user_id'],
+                amount: (float)$validated['amount'],
                 comment: $validated['comment']  ?? ''
             ));
         } catch (CannotWithdrawException $e) {
-            
+
             return response()->json(
                 [
                     'status' => 'error',
@@ -38,7 +40,7 @@ class TransferController
                 409
             );
         } catch (UserBalanceNotFoundException $e) {
-            
+
             return response()->json(
                 [
                     'status' => 'error',

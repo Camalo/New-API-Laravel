@@ -14,20 +14,22 @@ class WithdrawController
 {
     public function __invoke(Request $request, WithdrawUseCase $useCase)
     {
+        $request->headers->set('Accept', 'application/json');
+
         $validated = $request->validate([
             'user_id' => 'required|integer',
             'amount'  => 'required|numeric|min:0.01',
             'comment' => 'nullable|string',
         ]);
-
+      
         try {
             $response = $useCase(new WithdrawRequest(
-                $validated['user_id'],
-                $validated['amount'],
-                $validated['comment']  ?? ''
+                userId: (int)$validated['user_id'],
+                amount: (float)$validated['amount'],
+                comment: $validated['comment']  ?? ''
             ));
         } catch (CannotWithdrawException $e) {
-            
+
             return response()->json(
                 [
                     'status' => 'error',
@@ -36,7 +38,7 @@ class WithdrawController
                 409
             );
         } catch (UserBalanceNotFoundException $e) {
-            
+
             return response()->json(
                 [
                     'status' => 'error',

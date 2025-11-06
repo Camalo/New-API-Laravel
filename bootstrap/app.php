@@ -13,11 +13,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+       
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Validation\ValidationException $e, $request) {
+            $errors = $e->errors();
+            $field = array_key_first($errors);
 
+            return response()->json([
+                'status'  => 'error',
+                'message' => "Невалидное значение '{$field}'",
+            ], 400);
+        });
     })
     ->withProviders([
         Illuminate\Database\DatabaseServiceProvider::class,
@@ -30,7 +37,3 @@ return Application::configure(basePath: dirname(__DIR__))
         Illuminate\Session\SessionServiceProvider::class,
         Illuminate\Translation\TranslationServiceProvider::class
     ])->create();
-
-// $app->singleton('files', function () {
-//     return new Illuminate\Filesystem\Filesystem;
-// });
